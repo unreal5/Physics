@@ -56,7 +56,7 @@ Thumbs.db
 *.toc
 *.fls
 *.synctex.gz
-
+*.pdf
 # Custom
 Backup/
 CourseAssets/
