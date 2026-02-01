@@ -42,6 +42,29 @@
 %]
 
 
+% 定义 PowerShell 代码样式
+\lstdefinelanguage{PowerShell}{
+	keywords={Get-ChildItem, Rename-Item, -NewName, -replace, -WhatIf},
+	morekeywords={Wait-Process, Get-Process},
+	sensitive=false,
+	morecomment=[l]{\#},
+	morestring=[b]",
+	morestring=[b]'
+}
+
+\lstset{
+	language=PowerShell,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue!80!black}\bfseries,
+	stringstyle=\color{green!40!black},
+	commentstyle=\color{gray}\itshape,
+	frame=shadowbox,
+	rulesepcolor=\color{gray!20},
+	breaklines=true,
+	showstringspaces=false,
+	backgroundcolor=\color{gray!5}
+}
+
 \begin{document}
 
 %\frontmatter\tableofcontents
@@ -179,4 +202,149 @@
 对于倾斜传送带，$a_{斜滑}=g\cdot\sin\theta \pm \mu\cdot g\cdot\cos\theta$。如果物体\textbf{相对传送带}沿斜面向上滑，重力在斜面的分量和摩擦力一致，取“$+$”，否则取“$-$”。
 
 视频23分钟要注意。
+\chapter{斜面}
+\begin{center}
+	\begin{tikzpicture}[>=Stealth, scale=1, every node/.style={font=\small\itshape}]
+		% 图1：m受力分析
+		\begin{scope}
+			\def\ang{37}
+			\coordinate (O) at (0,0);
+			% \draw[dashed] (-1,0) -- (3,0); % Horizontal line
+			\draw[thick] (0,0) -- (3, {3*tan(\ang)});
+			\node at (2.5, 2.3) {斜面};
+			
+			% Object
+			\coordinate (P) at (1.5, {1.5*tan(\ang)});
+			\begin{scope}[shift={(P)}, rotate=\ang]
+				\draw[thick, fill=white] (-0.35,0) rectangle (0.35,0.4);
+				\node at (0,0.2) {$m$};
+				\coordinate (Center) at (0, 0.2);
+				
+				% Forces
+				\draw[->, red, thick] (Center) -- (0, 1.2) node[above] {$N_m$}; % Support
+				\draw[->, red, thick] (Center) -- (1.0, 0.2) node[right] {$f_m$}; % Friction (up slope)
+			\end{scope}
+			% Gravity
+			\begin{scope}[shift={(P)}]
+				\draw[->, blue, thick] (-0.1,{0.2*cos(\ang)}) -- (-0.1, -1.5) node[right] {$mg$};
+				\draw[fill=brown] (-0.1,{0.2*cos(\ang)}) circle(0.05);
+			\end{scope}
+			
+			\node[below] at (1.5, -1.5) {图1：物块$m$受力分析};
+		\end{scope}
+		
+		% 图2：M受力分析
+		\begin{scope}[shift={(6,0)}]
+			\def\ang{37}
+			\def\w{3.5}
+			\pgfmathsetmacro{\h}{\w*tan(\ang)}
+			
+			\coordinate (A) at (0,0);
+			\coordinate (B) at (\w,0);
+			\coordinate (C) at (\w,\h);
+			
+			\draw[thin] (A) -- (B) -- (C) -- cycle;
+			\node at ($(A)!0.6!(B)!0.3!(C)$) {$M$};
+			
+			% Forces from m on M
+			\coordinate (Contact) at ($(A)!0.65!(C)$);
+			\begin{scope}[shift={(Contact)}, rotate=\ang]
+				% N'_m (Pressure)
+				\draw[->, violet,very thick] (0,0) -- (0, -0.8) node[right] {$N'_m$};
+				% f'_m (Friction from m, down slope)
+				\draw[->, violet, very thick] (0,0) -- (-0.8, 0) node[above left] {$f'_m$};
+			\end{scope}
+			
+			% Gravity M
+			\coordinate (MCenter) at (2, 0.8);
+			\draw[->, blue, thick] (MCenter) -- ++(0, -1.5) node[right] {$Mg$};
+			
+			% Ground Support
+			\draw[->, red, thick] (2, 0) -- (2, 1.5) node[left,midway] {$N_{\text{地}}$};
+			
+			% Ground Friction (M pushed right by N'm_x and f'm_x? No. Check x components.)
+			% N'm is perp to slope (down-right). +x component.
+			% f'm is down slope (down-left). -x component.
+			% If N'm_x > f'm_x, M tends right.
+			% N'm_x = mg cos theta sin theta.
+			% f'm_x = f'm cos theta = m(g sin theta - a) cos theta.
+			% If a=g sin theta (smooth), f'm=0. M pushed right by N'm. Friction left.
+			% Generally friction f_ground is left.
+			\draw[->, red, thick] (2, 0) -- (0.8, 0) node[below] {$f_{\text{地}}$};
+			
+			\draw[thick] (-0.5,0) -- (\w+0.5,0);
+			\node[below] at (2, -1.5) {图2：斜面$M$受力分析};
+		\end{scope}
+	\end{tikzpicture}
+\end{center}
+\chapter{PowerShell的一些常用命令}
+\section{核心理念}
+PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非简单的文本字符串。
+\begin{itemize}
+	\item \textbf{输入}：不仅仅是文件名，而是包含属性（大小、时间、名称）的文件对象。
+	\item \textbf{处理}：通过管道符流式处理每一个对象。
+\end{itemize}
+
+\section{命令详解}
+
+\subsection{基本语法模板}
+\begin{lstlisting}
+Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
+\end{lstlisting}
+
+\subsection{参数逐步拆解}
+\begin{enumerate}
+	\item \textbf{\texttt{Get-ChildItem *.txt}}：
+	获取文件列表（类似 Linux 的 \ci{ls}）。输出一系列文件对象。
+	
+	\item 管道符号“\ci{|}” ：
+	将左侧找到的每一个文件对象，逐个传递给右侧命令处理。
+	
+	\item \textbf{\texttt{Rename-Item}}：
+	执行重命名动作的命令。
+	
+	\item \textbf{\texttt{-NewName \{ ... \}}}：
+	接收一个\textbf{脚本块}。PowerShell 会对管道传来的\textbf{每一个}文件执行此代码，计算出新的名字。
+	
+	\item \textbf{\texttt{\$\_}} (当前对象)：
+	在脚本块中，\texttt{\$\_} 代表“当前正在处理的这个文件”。
+	\begin{itemize}
+		\item \texttt{\$\_.Name}：获取完整文件名（如 \texttt{data.txt}）。
+	\end{itemize}
+	
+	\item \textbf{\texttt{-replace}} (操作符)：
+	语法：\texttt{'源' -replace '正则', '新内容'}
+	\begin{itemize}
+		\item 默认\textbf{不区分大小写}。
+		\item 支持标准正则（如 \ci{^} 开头，\texttt{\$} 结尾）。
+		\item 支持捕获组引用（如 \texttt{\$1}）。
+	\end{itemize}
+\end{enumerate}
+
+\section{实战场景与技巧}
+
+\subsection{1. 安全模式 (强烈推荐)}
+在正式执行前，务必添加 \texttt{-WhatIf} 参数进行预览，防止误操作。
+\begin{lstlisting}
+Get-ChildItem *.log | Rename-Item -NewName { $_.Name -replace 'old', 'new' } -WhatIf
+\end{lstlisting}
+
+\subsection{2. 使用捕获组调换顺序}
+场景：将 \texttt{Part1\_Invoice.pdf} 改为 \texttt{Invoice\_Part1.pdf}。
+\begin{lstlisting}
+Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$', '$2_$1.pdf'}
+\end{lstlisting}
+\textit{注：\texttt{\$1} 和 \texttt{\$2} 对应正则表达式中括号捕获的内容。}
+
+\subsection{3. 仅操作文件名 (保留扩展名)}
+如果担心误改扩展名，可以使用 \texttt{\$\_.BaseName} 仅获取主文件名。
+\begin{lstlisting}
+	# 仅给文件名前加 Backup_，不影响后续扩展名
+	Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
+\end{lstlisting}
+
+\section{总结公式}
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=记忆口诀]
+	Let (获取列表) $\rightarrow$ Pipe (管道传入) $\rightarrow$ Rename (重命名命令) $\rightarrow$ Script (计算新名)
+\end{tcolorbox}
 \end{document}
