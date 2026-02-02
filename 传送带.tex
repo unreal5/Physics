@@ -74,6 +74,78 @@
 \mainmatter
 %\setchapterimage{./images/055}
 \setchapterimage{./images/bw}
+
+\chapter{PowerShell的一些常用命令}
+\section{核心理念}
+PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非简单的文本字符串。
+\begin{itemize}
+	\item \textbf{输入}：不仅仅是文件名，而是包含属性（大小、时间、名称）的文件对象。
+	\item \textbf{处理}：通过管道符流式处理每一个对象。
+\end{itemize}
+
+\section{命令详解}
+
+\subsection{基本语法模板}
+\begin{lstlisting}
+	Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
+\end{lstlisting}
+
+\subsection{参数逐步拆解}
+\begin{enumerate}
+	\item \textbf{\texttt{Get-ChildItem *.txt}}：
+	获取文件列表（类似 Linux 的 \ci{ls}）。输出一系列文件对象。
+	
+	\item 管道符号“\ci{|}” ：
+	将左侧找到的每一个文件对象，逐个传递给右侧命令处理。
+	
+	\item \textbf{\texttt{Rename-Item}}：
+	执行重命名动作的命令。
+	
+	\item \textbf{\texttt{-NewName \{ ... \}}}：
+	接收一个\textbf{脚本块}。PowerShell 会对管道传来的\textbf{每一个}文件执行此代码，计算出新的名字。
+	
+	\item \textbf{\texttt{\$\_}} (当前对象)：
+	在脚本块中，\texttt{\$\_} 代表“当前正在处理的这个文件”。
+	\begin{itemize}
+		\item \texttt{\$\_.Name}：获取完整文件名（如 \texttt{data.txt}）。
+	\end{itemize}
+	
+	\item \textbf{\texttt{-replace}} (操作符)：
+	语法：\texttt{'源' -replace '正则', '新内容'}
+	\begin{itemize}
+		\item 默认\textbf{不区分大小写}。
+		\item 支持标准正则（如 \ci{^} 开头，\texttt{\$} 结尾）。
+		\item 支持捕获组引用（如 \texttt{\$1}）。
+	\end{itemize}
+\end{enumerate}
+
+\section{实战场景与技巧}
+
+\subsection{1. 安全模式 (强烈推荐)}
+在正式执行前，务必添加 \texttt{-WhatIf} 参数进行预览，防止误操作。
+\begin{lstlisting}
+	Get-ChildItem *.log | Rename-Item -NewName { $_.Name -replace 'old', 'new' } -WhatIf
+\end{lstlisting}
+
+\subsection{2. 使用捕获组调换顺序}
+场景：将 \texttt{Part1\_Invoice.pdf} 改为 \texttt{Invoice\_Part1.pdf}。
+\begin{lstlisting}
+	Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$', '$2_$1.pdf'}
+\end{lstlisting}
+\textit{注：\texttt{\$1} 和 \texttt{\$2} 对应正则表达式中括号捕获的内容。}
+
+\subsection{3. 仅操作文件名 (保留扩展名)}
+如果担心误改扩展名，可以使用 \texttt{\$\_.BaseName} 仅获取主文件名。
+\begin{lstlisting}
+	# 仅给文件名前加 Backup_，不影响后续扩展名
+	Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
+\end{lstlisting}
+
+\section{总结公式}
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=记忆口诀]
+	Let (获取列表) $\rightarrow$ Pipe (管道传入) $\rightarrow$ Rename (重命名命令) $\rightarrow$ Script (计算新名)
+\end{tcolorbox}
+
 \chapter{传送带专题}
 \section{传送带问题一般分析方法}
 %\includegraphics{./pics/1.png}
@@ -311,105 +383,63 @@
 \caption{习题}
 \label{fig3.1}
 \end{figure}
-选项分析
-\begin{enumerate}
-	\item {选项A：物体\( A \)可能相对小车向右运动}
-	若物体相对小车向右运动，需\( f' = -f_{\text{滑}} \)（向左），则：
-	\[
-	F_{\text{弹}}' = 8 + f_{\text{滑}} \geq 8 + 5 = 13 \, \text{N}
-	\]
-	但弹簧拉力由形变量决定，小车加速瞬间弹簧形变量不变，\( F_{\text{弹}}' = 5 \, \text{N} \)，无法满足上式。因此A\cuo。
-	
-	
-	\item {选项B：物体\( A \)受到的弹簧拉力可能增大}
-	弹簧拉力由形变量决定，小车加速瞬间弹簧未发生新的形变，故\( F_{\text{弹}}' = 5 \, \text{N} \)。因此B\cuo。
-	
-	
-	\item {选项C：物体\( A \)受到的摩擦力大小可能不变}
-	已知\( F_{\text{弹}}' = 5 \, \text{N} \)，代入受力方程得：
-	\[
-	f' = 8 - 5 = 3 \, \text{N} \quad (\text{向右})
-	\]
-	但需考虑摩擦力的方向变化：
-	- 初始时摩擦力向左（\( f = 5 \, \text{N} \)）；
-	- 若最大静摩擦力\( f_{\text{max}} \geq 3 \, \text{N} \)，则加速后摩擦力可向右，大小为\( 3 \, \text{N} \)；
-	- 若\( f_{\text{max}} \geq 5 \, \text{N} \)，也可能存在**摩擦力大小不变**的情况（例如：摩擦力向左，大小仍为\( 5 \, \text{N} \)，此时\( F_{\text{弹}}' + f' = 5 + 5 = 10 \, \text{N} > 8 \, \text{N} \)，实际需结合静摩擦力范围调整，存在“大小不变”的可能）。
-	
-	因此C正确\dui。
-	
-	
-	\item {选项D：物体\( A \)受到的摩擦力一定减小}
-	由选项C的分析，摩擦力可能从向左的\( 5 \, \text{N} \)变为向右的\( 3 \, \text{N} \)（减小），但也可能保持\( 5 \, \text{N} \)（大小不变）。因此D\cuo。
-\end{enumerate}	
-正确选项为\(\boxed{C}\)。
-\chapter{PowerShell的一些常用命令}
-\section{核心理念}
-PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非简单的文本字符串。
+
+\subsection*{解答}
+
+\textbf{解析：}
+
+\textbf{1. 初始状态分析：}
+
+由图可知，弹簧连接在物体\( A \)的右侧和小车的右壁之间，且弹簧处于“被拉伸”状态，因此弹簧对物体\( A \)施加向右的拉力 \( F_{\text{弹}} = 5 \text{ N} \)。
+
+物体\( A \)处于静止状态，受力平衡。在水平方向上：
+\[ F_{\text{弹}} + f = 0 \]
+\[ f = -F_{\text{弹}} = -5 \text{ N} \]
+即初始摩擦力大小为 5 N，方向水平向左。
+
+同时可知，最大静摩擦力 \( f_{\max} \) 至少能提供 5 N 的力，即 \( f_{\max} \geq 5 \text{ N} \)。
+
+\textbf{2. 加速状态分析：}
+
+小车以 \( a = 0.8 \text{ m/s}^2 \) 向右加速。假设物体\( A \)相对于小车静止（即随车一起加速），则物体\( A \)的加速度也是 \( 0.8 \text{ m/s}^2 \)（向右）。
+
+根据牛顿第二定律，物体\( A \)所受合外力应为：
+\[ F_{\text{合}} = ma = 10 \times 0.8 = 8 \text{ N} \text{（向右）} \]
+
+此时，水平方向受力仍为弹簧拉力和摩擦力。假设相对静止，弹簧长度未变，拉力仍为 \( 5 \text{ N} \)（向右）。
+设此时的摩擦力为 \( f' \)（向右为正）：
+\[ F_{\text{弹}} + f' = F_{\text{合}} \]
+\[ 5 + f' = 8 \]
+\[ f' = 3 \text{ N} \]
+
+结果表明，要使物体随车一起以 \( 0.8 \text{ m/s}^2 \) 加速，需要 3 N 向右的静摩擦力。
+
+\textbf{3. 检验假设：}
+
+我们算出需要的静摩擦力为 3 N。而我们已知最大静摩擦力 \( f_{\max} \geq 5 \text{ N} \)。
+因为 \( 3 \text{ N} < 5 \text{ N} \)，所以静摩擦力足以提供所需的加速度，物体\( A \) \textbf{不会} 发生相对滑动，确实和小车保持相对静止。
+
+\textbf{4. 对比前后状态：}
+
 \begin{itemize}
-	\item \textbf{输入}：不仅仅是文件名，而是包含属性（大小、时间、名称）的文件对象。
-	\item \textbf{处理}：通过管道符流式处理每一个对象。
+	\item \textbf{弹簧拉力：} 始终为 5 N（因为没有相对滑动）。
+	\item \textbf{摩擦力：} 由 5 N（向左）变为 3 N（向右）。
+	\item \textbf{摩擦力大小：} 由 5 N 减小为 3 N。
 \end{itemize}
 
-\section{命令详解}
+\textbf{5. 选项分析：}
 
-\subsection{基本语法模板}
-\begin{lstlisting}
-Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
-\end{lstlisting}
+\begin{itemize}
+	\item \textbf{A. 物体\( A \)可能会相对小车向右运动}：
+	错误。我们已经验证物体相对于小车静止。即使发生滑动，物体相对于小车的加速度小于车的加速度，表现为相对后退（向左），绝不可能相对向右冲去。
+	\item \textbf{B. 物体\( A \)受到的弹簧的拉力可能增大}：
+	错误。物体相对静止，弹簧形变量不变，拉力不变。
+	\item \textbf{C. 物体\( A \)受到的摩擦力大小可能不变}：
+	错误。摩擦力大小由 5 N 变为 3 N，一定变了。
+	\item \textbf{D. 物体\( A \)受到的摩擦力一定减小}：
+	正确。大小从 5 N 变为 3 N，确实减小了。
+\end{itemize}
 
-\subsection{参数逐步拆解}
-\begin{enumerate}
-	\item \textbf{\texttt{Get-ChildItem *.txt}}：
-	获取文件列表（类似 Linux 的 \ci{ls}）。输出一系列文件对象。
-	
-	\item 管道符号“\ci{|}” ：
-	将左侧找到的每一个文件对象，逐个传递给右侧命令处理。
-	
-	\item \textbf{\texttt{Rename-Item}}：
-	执行重命名动作的命令。
-	
-	\item \textbf{\texttt{-NewName \{ ... \}}}：
-	接收一个\textbf{脚本块}。PowerShell 会对管道传来的\textbf{每一个}文件执行此代码，计算出新的名字。
-	
-	\item \textbf{\texttt{\$\_}} (当前对象)：
-	在脚本块中，\texttt{\$\_} 代表“当前正在处理的这个文件”。
-	\begin{itemize}
-		\item \texttt{\$\_.Name}：获取完整文件名（如 \texttt{data.txt}）。
-	\end{itemize}
-	
-	\item \textbf{\texttt{-replace}} (操作符)：
-	语法：\texttt{'源' -replace '正则', '新内容'}
-	\begin{itemize}
-		\item 默认\textbf{不区分大小写}。
-		\item 支持标准正则（如 \ci{^} 开头，\texttt{\$} 结尾）。
-		\item 支持捕获组引用（如 \texttt{\$1}）。
-	\end{itemize}
-\end{enumerate}
+\textbf{答案：D}
 
-\section{实战场景与技巧}
-
-\subsection{1. 安全模式 (强烈推荐)}
-在正式执行前，务必添加 \texttt{-WhatIf} 参数进行预览，防止误操作。
-\begin{lstlisting}
-Get-ChildItem *.log | Rename-Item -NewName { $_.Name -replace 'old', 'new' } -WhatIf
-\end{lstlisting}
-
-\subsection{2. 使用捕获组调换顺序}
-场景：将 \texttt{Part1\_Invoice.pdf} 改为 \texttt{Invoice\_Part1.pdf}。
-\begin{lstlisting}
-Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$', '$2_$1.pdf'}
-\end{lstlisting}
-\textit{注：\texttt{\$1} 和 \texttt{\$2} 对应正则表达式中括号捕获的内容。}
-
-\subsection{3. 仅操作文件名 (保留扩展名)}
-如果担心误改扩展名，可以使用 \texttt{\$\_.BaseName} 仅获取主文件名。
-\begin{lstlisting}
-	# 仅给文件名前加 Backup_，不影响后续扩展名
-	Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
-\end{lstlisting}
-
-\section{总结公式}
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=记忆口诀]
-	Let (获取列表) $\rightarrow$ Pipe (管道传入) $\rightarrow$ Rename (重命名命令) $\rightarrow$ Script (计算新名)
-\end{tcolorbox}
 \end{document}
