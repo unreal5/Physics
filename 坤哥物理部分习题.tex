@@ -1,0 +1,202 @@
+\chapter{斜面}
+\begin{center}
+	\begin{tikzpicture}[>=Stealth, scale=1, every node/.style={font=\small\itshape}]
+		% 图1：m受力分析
+		\begin{scope}
+			\def\ang{37}
+			\coordinate (O) at (0,0);
+			% \draw[dashed] (-1,0) -- (3,0); % Horizontal line
+			\draw[thick] (0,0) -- (3, {3*tan(\ang)});
+			\node at (2.5, 2.3) {斜面};
+			
+			% Object
+			\coordinate (P) at (1.5, {1.5*tan(\ang)});
+			\begin{scope}[shift={(P)}, rotate=\ang]
+				\draw[thick, fill=white] (-0.35,0) rectangle (0.35,0.4);
+				\node at (0,0.2) {$m$};
+				\coordinate (Center) at (0, 0.2);
+				
+				% Forces
+				\draw[->, red, thick] (Center) -- (0, 1.2) node[above] {$N_m$}; % Support
+				\draw[->, red, thick] (Center) -- (1.0, 0.2) node[right] {$f_m$}; % Friction (up slope)
+			\end{scope}
+			% Gravity
+			\begin{scope}[shift={(P)}]
+				\draw[->, blue, thick] (-0.1,{0.2*cos(\ang)}) -- (-0.1, -1.5) node[right] {$mg$};
+				\draw[fill=brown] (-0.1,{0.2*cos(\ang)}) circle(0.05);
+			\end{scope}
+			
+			\node[below] at (1.5, -1.5) {图1：物块$m$受力分析};
+		\end{scope}
+		
+		% 图2：M受力分析
+		\begin{scope}[shift={(6,0)}]
+			\def\ang{37}
+			\def\w{3.5}
+			\pgfmathsetmacro{\h}{\w*tan(\ang)}
+			
+			\coordinate (A) at (0,0);
+			\coordinate (B) at (\w,0);
+			\coordinate (C) at (\w,\h);
+			
+			\draw[thin] (A) -- (B) -- (C) -- cycle;
+			\node at ($(A)!0.6!(B)!0.3!(C)$) {$M$};
+			
+			% Forces from m on M
+			\coordinate (Contact) at ($(A)!0.65!(C)$);
+			\begin{scope}[shift={(Contact)}, rotate=\ang]
+				% N'_m (Pressure)
+				\draw[->, violet,very thick] (0,0) -- (0, -0.8) node[right] {$N'_m$};
+				% f'_m (Friction from m, down slope)
+				\draw[->, violet, very thick] (0,0) -- (-0.8, 0) node[above left] {$f'_m$};
+			\end{scope}
+			
+			% Gravity M
+			\coordinate (MCenter) at (2, 0.8);
+			\draw[->, blue, thick] (MCenter) -- ++(0, -1.5) node[right] {$Mg$};
+			
+			% Ground Support
+			\draw[->, red, thick] (2, 0) -- (2, 1.5) node[left,midway] {$N_{\text{地}}$};
+			
+			% Ground Friction (M pushed right by N'm_x and f'm_x? No. Check x components.)
+			% N'm is perp to slope (down-right). +x component.
+			% f'm is down slope (down-left). -x component.
+			% If N'm_x > f'm_x, M tends right.
+			% N'm_x = mg cos theta sin theta.
+			% f'm_x = f'm cos theta = m(g sin theta - a) cos theta.
+			% If a=g sin theta (smooth), f'm=0. M pushed right by N'm. Friction left.
+			% Generally friction f_ground is left.
+			\draw[->, red, thick] (2, 0) -- (0.8, 0) node[below] {$f_{\text{地}}$};
+			
+			\draw[thick] (-0.5,0) -- (\w+0.5,0);
+			\node[below] at (2, -1.5) {图2：斜面$M$受力分析};
+		\end{scope}
+	\end{tikzpicture}
+\end{center}
+
+\chapter{牛二}
+如图\ref{fig3.1}所示，质量为10 kg的物体\( A \)拴在一个被水平拉伸的弹簧一端，弹簧的拉力为5 N时，物体\( A \)处于静止状态。若小车突然以\( 0.8 m/s^2 \)的加速度向右加速运动，重力加速度\( g = 10 m/s^2 \)，则（）
+\begin{enumerate}[label=\Alph*.\ ]
+	\item 物体\( A \)可能会相对小车向右运动
+	\item  物体\( A \)受到的弹簧的拉力可能增大
+	\item  物体\( A \)受到的摩擦力大小可能不变
+	\item  物体\( A \)受到的摩擦力一定减小
+\end{enumerate}
+
+\begin{figure}[H]
+	\begin{center}
+		\begin{tikzpicture}[scale=1.2]
+			% 小车
+			\draw[fill=gray!20] (0,-0.8)--(4,-0.8)--(4,-0.7)--(4,1)--(3.9,1)--(3.9,-0.7)--(0,-0.7)--cycle;
+			\draw[fill] (0.5,-0.9) circle (0.1);
+			\draw[fill] (3.5,-0.9) circle (0.1);
+			\draw[pattern=north east lines] (0,-1.1) rectangle (4,-1); % 地面
+			
+			% 物体A
+			\draw[fill=gray!30,thick] (1,-0.7) rectangle (2,0.3);
+			\node at (1.5,-.2) {$A$};
+			
+			% 弹簧coil也可以
+			\draw[decorate,decoration={zigzag, segment length=4pt, amplitude=4pt}] (2,-0.2) -- (3.9,-0.2);
+			
+		\end{tikzpicture}
+	\end{center}
+	\caption{习题}
+	\label{fig3.1}
+\end{figure}
+
+\subsection*{解答}
+
+\textbf{推理：}原来拉力$5N$静止不动，表示$f_{max静摩擦力}\ge 5N$。现在突然需要向右$8N$的力，弹簧不是瞬时力，只能提供$5N$，那么必定有$3N$水平向右的力，由静摩擦力提供。此时物体A：$f_{摩擦力} <  f_{max摩擦力}$不会动。
+\begin{enumerate}
+	
+	
+	\item 		\textbf{初始状态分析：}
+	由图可知，弹簧连接在物体\( A \)的右侧和小车的右壁之间，且弹簧处于“被拉伸”状态，因此弹簧对物体\( A \)施加向右的拉力 \( F_{\text{弹}} = 5 \text{ N} \)。
+	
+	物体\( A \)处于静止状态，受力平衡。在水平方向上：
+	\begin{align*}
+		&\because F_{\text{弹}} + f = 0 \\
+		&\therefore f = -F_{\text{弹}} = -5 \text{ N}
+	\end{align*}
+	即初始摩擦力大小为 5 N，方向水平向左。
+	
+	同时可知，最大静摩擦力 \( f_{\max} \) 至少能提供 5 N 的力，即 \( f_{\max} \geq 5 \text{ N} \)。
+	
+	\item 		\textbf{加速状态分析：}
+	小车以 \( a = 0.8 \text{ m/s}^2 \) 向右加速。假设物体\( A \)相对于小车静止（即随车一起加速），则物体\( A \)的加速度也是 \( 0.8 \text{ m/s}^2 \)（向右）。
+	
+	根据牛顿第二定律，物体\( A \)所受合外力应为：
+	\[ F_{\text{合}} = ma = 10 \times 0.8 = 8 \text{ N} \text{（向右）} \]
+	
+	此时，水平方向受力仍为弹簧拉力和摩擦力。根据假设相对静止，弹簧长度未变，拉力仍为 \( 5 \text{ N} \)（向右）。
+	设此时的摩擦力为 \( f' \)（向右为正）：
+	\[ F_{\text{弹}} + f' = F_{\text{合}} \]
+	\[ 5 + f' = 8 \]
+	\[ f' = 3 \text{ N} \]
+	
+	结果表明，要使物体随车一起以 \( 0.8 \text{ m/s}^2 \) 加速，需要 3 N 向右的静摩擦力。
+	
+	\item 		\textbf{检验假设：}
+	我们算出需要的静摩擦力为 3 N。而我们已知最大静摩擦力 \( f_{\max} \geq 5 \text{ N} \)。
+	因为 \( 3 \text{ N} < 5 \text{ N} \)，所以静摩擦力足以提供所需的加速度，物体\( A \) \textbf{不会} 发生相对滑动，确实和小车保持相对静止。
+	
+	\item 		\textbf{对比前后状态：}
+	\begin{itemize}
+		\item \textbf{弹簧拉力：} 始终为 5 N（因为没有相对滑动）。
+		\item \textbf{摩擦力：} 由 5 N（向左）变为 3 N（向右）。
+		\item \textbf{摩擦力大小：} 由 5 N 减小为 3 N。
+	\end{itemize}
+	
+	\item 		\textbf{选项分析：}
+	\begin{itemize}
+		\item \textbf{A. 物体\( A \)可能会相对小车向右运动}：
+		\cuo 我们已经验证物体相对于小车静止。即使发生滑动，物体相对于小车的加速度小于车的加速度，表现为相对后退（向左），绝不可能相对向右冲去。
+		\item \textbf{B. 物体\( A \)受到的弹簧的拉力可能增大}：
+		\cuo 物体相对静止，弹簧形变量不变，拉力不变。
+		\item \textbf{C. 物体\( A \)受到的摩擦力大小可能不变}：
+		\cuo。摩擦力大小由 5 N 变为 3 N，一定变了。
+		\item \textbf{D. 物体\( A \)受到的摩擦力一定减小}：
+		\dui 大小从 5 N 变为 3 N，确实减小了。
+	\end{itemize}
+\end{enumerate}
+\textbf{答案：D}
+
+如图\ref{fig3.2}所示，质量分别为 $m_A$ 和 $m_B$ 的 A、B 两物体沿着固定光滑斜面匀加速下滑，斜面倾角为 $\theta=30^\circ$，A 的上表面水平，且 A、B 始终保持相对静止，重力加速度为 $g$。则物体 A、B 的加速度大小为：\underline{$g\sin\theta$}；B 受到 A 的摩擦力大小为：\underline{$M_B\sin\theta\cos\theta=\dfrac{\sqrt{3}}{4}M_B\cdot g$}、B 受到 A的支持力大小为：\underline{$M_Bg-N=M\cdot a\sin\theta\iff N=\dfrac{3}{4}m_Bg$}。
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=5cm]{pics/2.png}
+	\caption{物体匀加速下滑示意图}
+	\label{fig3.2}
+\end{figure}
+加速度有竖直向下分量，物体失重。
+
+(多选)如图所示，物体A的质量为$M$，水平面光滑，不计滑轮的质量及摩擦。当在轻绳的$B$端挂一质量为$m$的物体时，物体$A$的加速度为$a_1$；当在轻绳的$B$端施以$F=mg$的竖直向下的拉力作用时，$A$的加速度为$a_2$，则（）
+
+\begin{enumerate}
+	\item[A.] $a_1=\dfrac{m}{M}g$
+	\item[B.] $a_2=\dfrac{m}{M}g$
+	\item[C.] $a_1=a_2$
+	\item[D.] $a_1<a_2$
+\end{enumerate}
+
+\begin{tikzpicture}[scale=0.8]
+	% 绘制水平面和竖直墙面
+	\draw[thick] (0,0) -- (6,0);
+	\draw[thick] (6,0) -- (6,-6);
+	\draw[pattern=north east lines] (0,-0) rectangle (6,-0.2);
+	\draw[pattern=north east lines] (6,0) rectangle (5.8,-6);
+	
+	% 绘制物体A
+	\draw[thick] (1,0) rectangle (2,1) node[midway] {A};
+	
+	% 绘制滑轮
+	\filldraw[black] (6.15,0.15) circle (0.2);
+	\draw[thick] (5.8,-0.2) arc (270:90:0.2);
+	
+	% 绘制绳子
+	\draw[thick] (2,0.5) -- (6.3,0.5)  -- (6.3,-2) node[midway, right] {B};
+	
+	% 绘制拉力F
+	\draw[thick, ->] (6.3,-2) -- (6.3,-4) node[below] {$F$};
+\end{tikzpicture}

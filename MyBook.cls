@@ -196,7 +196,7 @@
 
 %页脚
 \RequirePackage{lastpage}               % "X of Y" footer
-\newcommand{\print@page}{\textcolor{accentcolor}{第~\thepage~/~\pageref{LastPage}~页}}
+\newcommand{\print@page}{\textcolor{maincolor}{第~\thepage~/~\pageref{LastPage}~页}}
 
 \RequirePackage{fancyhdr}
 \pagestyle{fancy}

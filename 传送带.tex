@@ -88,31 +88,34 @@ PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非�
 
 \subsection{基本语法模板}
 \begin{lstlisting}
-	Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
+Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
 \end{lstlisting}
 
 \subsection{参数逐步拆解}
 \begin{enumerate}
-	\item \textbf{\texttt{Get-ChildItem *.txt}}：
+	\item \ci{Get-ChildItem *.txt}：
 	获取文件列表（类似 Linux 的 \ci{ls}）。输出一系列文件对象。
 	
 	\item 管道符号“\ci{|}” ：
 	将左侧找到的每一个文件对象，逐个传递给右侧命令处理。
 	
-	\item \textbf{\texttt{Rename-Item}}：
+	\item \ci{Rename-Item}：
 	执行重命名动作的命令。
 	
-	\item \textbf{\texttt{-NewName \{ ... \}}}：
+	\item \ci{-NewName \{ ... \}}：
 	接收一个\textbf{脚本块}。PowerShell 会对管道传来的\textbf{每一个}文件执行此代码，计算出新的名字。
 	
-	\item \textbf{\texttt{\$\_}} (当前对象)：
-	在脚本块中，\texttt{\$\_} 代表“当前正在处理的这个文件”。
+	\item \textcolor{red}{\texttt{\$\_}} (当前对象)：
+	在脚本块中，\ci{\$\_} 代表“当前正在处理的这个文件”。
 	\begin{itemize}
 		\item \texttt{\$\_.Name}：获取完整文件名（如 \texttt{data.txt}）。
 	\end{itemize}
 	
 	\item \textbf{\texttt{-replace}} (操作符)：
-	语法：\texttt{'源' -replace '正则', '新内容'}
+	语法：
+	\begin{lstlisting}
+'源' -replace '正则', '新内容'
+	\end{lstlisting}
 	\begin{itemize}
 		\item 默认\textbf{不区分大小写}。
 		\item 支持标准正则（如 \ci{^} 开头，\texttt{\$} 结尾）。
@@ -125,21 +128,21 @@ PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非�
 \subsection{1. 安全模式 (强烈推荐)}
 在正式执行前，务必添加 \texttt{-WhatIf} 参数进行预览，防止误操作。
 \begin{lstlisting}
-	Get-ChildItem *.log | Rename-Item -NewName { $_.Name -replace 'old', 'new' } -WhatIf
+Get-ChildItem *.log | Rename-Item -NewName {$_.Name -replace 'old', 'new'} -WhatIf
 \end{lstlisting}
 
 \subsection{2. 使用捕获组调换顺序}
 场景：将 \texttt{Part1\_Invoice.pdf} 改为 \texttt{Invoice\_Part1.pdf}。
 \begin{lstlisting}
-	Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$', '$2_$1.pdf'}
+Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$','$2_$1.pdf'}
 \end{lstlisting}
 \textit{注：\texttt{\$1} 和 \texttt{\$2} 对应正则表达式中括号捕获的内容。}
 
 \subsection{3. 仅操作文件名 (保留扩展名)}
 如果担心误改扩展名，可以使用 \texttt{\$\_.BaseName} 仅获取主文件名。
 \begin{lstlisting}
-	# 仅给文件名前加 Backup_，不影响后续扩展名
-	Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
+# 仅给文件名前加 Backup_，不影响后续扩展名
+Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 \end{lstlisting}
 
 \section{总结公式}
@@ -277,207 +280,144 @@ PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非�
 
 对于倾斜传送带，$a_{斜滑}=g\cdot\sin\theta \pm \mu\cdot g\cdot\cos\theta$。如果物体\textbf{相对传送带}沿斜面向上滑，重力在斜面的分量和摩擦力一致，取“$+$”，否则取“$-$”。
 
-视频23分钟要注意。
-\chapter{斜面}
-\begin{center}
-	\begin{tikzpicture}[>=Stealth, scale=1, every node/.style={font=\small\itshape}]
-		% 图1：m受力分析
-		\begin{scope}
-			\def\ang{37}
-			\coordinate (O) at (0,0);
-			% \draw[dashed] (-1,0) -- (3,0); % Horizontal line
-			\draw[thick] (0,0) -- (3, {3*tan(\ang)});
-			\node at (2.5, 2.3) {斜面};
-			
-			% Object
-			\coordinate (P) at (1.5, {1.5*tan(\ang)});
-			\begin{scope}[shift={(P)}, rotate=\ang]
-				\draw[thick, fill=white] (-0.35,0) rectangle (0.35,0.4);
-				\node at (0,0.2) {$m$};
-				\coordinate (Center) at (0, 0.2);
-				
-				% Forces
-				\draw[->, red, thick] (Center) -- (0, 1.2) node[above] {$N_m$}; % Support
-				\draw[->, red, thick] (Center) -- (1.0, 0.2) node[right] {$f_m$}; % Friction (up slope)
-			\end{scope}
-			% Gravity
-			\begin{scope}[shift={(P)}]
-				\draw[->, blue, thick] (-0.1,{0.2*cos(\ang)}) -- (-0.1, -1.5) node[right] {$mg$};
-				\draw[fill=brown] (-0.1,{0.2*cos(\ang)}) circle(0.05);
-			\end{scope}
-			
-			\node[below] at (1.5, -1.5) {图1：物块$m$受力分析};
-		\end{scope}
-		
-		% 图2：M受力分析
-		\begin{scope}[shift={(6,0)}]
-			\def\ang{37}
-			\def\w{3.5}
-			\pgfmathsetmacro{\h}{\w*tan(\ang)}
-			
-			\coordinate (A) at (0,0);
-			\coordinate (B) at (\w,0);
-			\coordinate (C) at (\w,\h);
-			
-			\draw[thin] (A) -- (B) -- (C) -- cycle;
-			\node at ($(A)!0.6!(B)!0.3!(C)$) {$M$};
-			
-			% Forces from m on M
-			\coordinate (Contact) at ($(A)!0.65!(C)$);
-			\begin{scope}[shift={(Contact)}, rotate=\ang]
-				% N'_m (Pressure)
-				\draw[->, violet,very thick] (0,0) -- (0, -0.8) node[right] {$N'_m$};
-				% f'_m (Friction from m, down slope)
-				\draw[->, violet, very thick] (0,0) -- (-0.8, 0) node[above left] {$f'_m$};
-			\end{scope}
-			
-			% Gravity M
-			\coordinate (MCenter) at (2, 0.8);
-			\draw[->, blue, thick] (MCenter) -- ++(0, -1.5) node[right] {$Mg$};
-			
-			% Ground Support
-			\draw[->, red, thick] (2, 0) -- (2, 1.5) node[left,midway] {$N_{\text{地}}$};
-			
-			% Ground Friction (M pushed right by N'm_x and f'm_x? No. Check x components.)
-			% N'm is perp to slope (down-right). +x component.
-			% f'm is down slope (down-left). -x component.
-			% If N'm_x > f'm_x, M tends right.
-			% N'm_x = mg cos theta sin theta.
-			% f'm_x = f'm cos theta = m(g sin theta - a) cos theta.
-			% If a=g sin theta (smooth), f'm=0. M pushed right by N'm. Friction left.
-			% Generally friction f_ground is left.
-			\draw[->, red, thick] (2, 0) -- (0.8, 0) node[below] {$f_{\text{地}}$};
-			
-			\draw[thick] (-0.5,0) -- (\w+0.5,0);
-			\node[below] at (2, -1.5) {图2：斜面$M$受力分析};
-		\end{scope}
-	\end{tikzpicture}
-\end{center}
-
-\chapter{牛二}
-如图\ref{fig3.1}所示，质量为10 kg的物体\( A \)拴在一个被水平拉伸的弹簧一端，弹簧的拉力为5 N时，物体\( A \)处于静止状态。若小车突然以\( 0.8 m/s^2 \)的加速度向右加速运动，重力加速度\( g = 10 m/s^2 \)，则（）
-\begin{enumerate}[label=\Alph*.\ ]
-	\item 物体\( A \)可能会相对小车向右运动
-	\item  物体\( A \)受到的弹簧的拉力可能增大
-	\item  物体\( A \)受到的摩擦力大小可能不变
-	\item  物体\( A \)受到的摩擦力一定减小
-\end{enumerate}
-
-\begin{figure}[H]
-\begin{center}
-	\begin{tikzpicture}[scale=1.2]
-		% 小车
-		\draw[fill=gray!20] (0,-0.8)--(4,-0.8)--(4,-0.7)--(4,1)--(3.9,1)--(3.9,-0.7)--(0,-0.7)--cycle;
-		\draw[fill] (0.5,-0.9) circle (0.1);
-		\draw[fill] (3.5,-0.9) circle (0.1);
-		\draw[pattern=north east lines] (0,-1.1) rectangle (4,-1); % 地面
-		
-		% 物体A
-		\draw[fill=gray!30,thick] (1,-0.7) rectangle (2,0.3);
-		\node at (1.5,-.2) {$A$};
-		
-		% 弹簧coil也可以
-		\draw[decorate,decoration={zigzag, segment length=4pt, amplitude=4pt}] (2,-0.2) -- (3.9,-0.2);
-		
-	\end{tikzpicture}
-\end{center}
-\caption{习题}
-\label{fig3.1}
-\end{figure}
-
-\subsection*{解答}
-
-\textbf{推理：}原来拉力$5N$静止不动，表示$f_{max静摩擦力}\ge 5N$。现在突然需要向右$8N$的力，弹簧不是瞬时力，只能提供$5N$，那么必定有$3N$水平向右的力，由静摩擦力提供。此时物体A：$f_{摩擦力} <  f_{max摩擦力}$不会动。
-\begin{enumerate}
-	
-
-	\item 		\textbf{初始状态分析：}
-			由图可知，弹簧连接在物体\( A \)的右侧和小车的右壁之间，且弹簧处于“被拉伸”状态，因此弹簧对物体\( A \)施加向右的拉力 \( F_{\text{弹}} = 5 \text{ N} \)。
-			
-			物体\( A \)处于静止状态，受力平衡。在水平方向上：
-			\begin{align*}
-			&\because F_{\text{弹}} + f = 0 \\
-			&\therefore f = -F_{\text{弹}} = -5 \text{ N}
-			\end{align*}
-			即初始摩擦力大小为 5 N，方向水平向左。
-			
-			同时可知，最大静摩擦力 \( f_{\max} \) 至少能提供 5 N 的力，即 \( f_{\max} \geq 5 \text{ N} \)。
-			
-	\item 		\textbf{加速状态分析：}
-			小车以 \( a = 0.8 \text{ m/s}^2 \) 向右加速。假设物体\( A \)相对于小车静止（即随车一起加速），则物体\( A \)的加速度也是 \( 0.8 \text{ m/s}^2 \)（向右）。
-			
-			根据牛顿第二定律，物体\( A \)所受合外力应为：
-			\[ F_{\text{合}} = ma = 10 \times 0.8 = 8 \text{ N} \text{（向右）} \]
-			
-			此时，水平方向受力仍为弹簧拉力和摩擦力。根据假设相对静止，弹簧长度未变，拉力仍为 \( 5 \text{ N} \)（向右）。
-			设此时的摩擦力为 \( f' \)（向右为正）：
-			\[ F_{\text{弹}} + f' = F_{\text{合}} \]
-			\[ 5 + f' = 8 \]
-			\[ f' = 3 \text{ N} \]
-			
-			结果表明，要使物体随车一起以 \( 0.8 \text{ m/s}^2 \) 加速，需要 3 N 向右的静摩擦力。
-			
-	\item 		\textbf{检验假设：}
-			我们算出需要的静摩擦力为 3 N。而我们已知最大静摩擦力 \( f_{\max} \geq 5 \text{ N} \)。
-			因为 \( 3 \text{ N} < 5 \text{ N} \)，所以静摩擦力足以提供所需的加速度，物体\( A \) \textbf{不会} 发生相对滑动，确实和小车保持相对静止。
-			
-	\item 		\textbf{对比前后状态：}
-			\begin{itemize}
-				\item \textbf{弹簧拉力：} 始终为 5 N（因为没有相对滑动）。
-				\item \textbf{摩擦力：} 由 5 N（向左）变为 3 N（向右）。
-				\item \textbf{摩擦力大小：} 由 5 N 减小为 3 N。
-			\end{itemize}
-			
-	\item 		\textbf{选项分析：}
-			\begin{itemize}
-				\item \textbf{A. 物体\( A \)可能会相对小车向右运动}：
-				\cuo 我们已经验证物体相对于小车静止。即使发生滑动，物体相对于小车的加速度小于车的加速度，表现为相对后退（向左），绝不可能相对向右冲去。
-				\item \textbf{B. 物体\( A \)受到的弹簧的拉力可能增大}：
-				\cuo 物体相对静止，弹簧形变量不变，拉力不变。
-				\item \textbf{C. 物体\( A \)受到的摩擦力大小可能不变}：
-				\cuo。摩擦力大小由 5 N 变为 3 N，一定变了。
-				\item \textbf{D. 物体\( A \)受到的摩擦力一定减小}：
-				\dui 大小从 5 N 变为 3 N，确实减小了。
-			\end{itemize}
-\end{enumerate}
-\textbf{答案：D}
-
-如图\ref{fig3.2}所示，质量分别为 $m_A$ 和 $m_B$ 的 A、B 两物体沿着固定光滑斜面匀加速下滑，斜面倾角为 $\theta=30^\circ$，A 的上表面水平，且 A、B 始终保持相对静止，重力加速度为 $g$。则物体 A、B 的加速度大小为：\underline{$g\sin\theta$}；B 受到 A 的摩擦力大小为：\underline{$M_B\sin\theta\cos\theta=\dfrac{\sqrt{3}}{4}M_B\cdot g$}、B 受到 A的支持力大小为：\underline{$M_Bg-N=M\cdot a\sin\theta\iff N=\dfrac{3}{4}m_Bg$}。
+\section{有限长传送带}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=5cm]{pics/2.png}
-	\caption{物体匀加速下滑示意图}
-	\label{fig3.2}
-\end{figure}
-加速度有竖直向下分量，物体失重。
+	\begin{tikzpicture}[>=Stealth, scale=1]
+			\def\R{0.2} % Pulley radius
+			\def\L{5.0}   % Distance between pulley centers
+			
+			% Pulleys
+			\filldraw[fill=gray!20] (0,0) circle (\R);
+			\filldraw[fill=gray!20] (\L,0) circle (\R);
+			\draw[fill=black] (0,0) circle (0.05);
+			\draw[fill=black] (\L,0) circle (0.05);
+			
+			% Belt
+			\draw[gray] (0,\R) -- (\L,\R);
+			\draw[gray] (0,-\R) -- (\L,-\R);
+			
+			
+			% Block (placed on left side)
+			\coordinate (BlockPos) at (0.4, \R+0.05);	
+			% Velocity vectors
+			% v0 (Block)
+			\draw[->, thick, red] ($(BlockPos)+(0.6, 0.25)$) -- ++(1.0, 0) node[above,midway] {$v_1$};
+			\draw[fill=blue!30] (BlockPos) rectangle ++(0.8, 0.5);
+			\node at ($(BlockPos)+(0.4, 0.25)$) {$m$};
+			
+		
+			% v (Belt)
+			\draw[->, thick, red] (4, 0.1) -- ++(-1.2, 0) node[below,midway] {$v_2$};
+			
+			
 
-(多选)如图所示，物体A的质量为$M$，水平面光滑，不计滑轮的质量及摩擦。当在轻绳的$B$端挂一质量为$m$的物体时，物体$A$的加速度为$a_1$；当在轻绳的$B$端施以$F=mg$的竖直向下的拉力作用时，$A$的加速度为$a_2$，则（）
-
-\begin{enumerate}
-	\item[A.] $a_1=\dfrac{m}{M}g$
-	\item[B.] $a_2=\dfrac{m}{M}g$
-	\item[C.] $a_1=a_2$
-	\item[D.] $a_1<a_2$
-\end{enumerate}
-
-\begin{tikzpicture}[scale=0.8]
-	% 绘制水平面和竖直墙面
-	\draw[thick] (0,0) -- (6,0);
-	\draw[thick] (6,0) -- (6,-6);
-	\draw[pattern=north east lines] (0,-0) rectangle (6,-0.2);
-	\draw[pattern=north east lines] (6,0) rectangle (5.8,-6);
+	\end{tikzpicture}
+	\caption{有限长传送带}
+\end{figure}	
+\subsection{$V_0$与$V_{带}$反向}
+\subsubsection{冲出（传送带不够长）}
+最简单情况：传送带没有足够长，物块直接冲出传送带。冲出的原因：物块在减速到0之前（对地最大位移），对地位移已经超出传送带长度$L$。如果把减速到0的对地位移记做$X_{减}$，则：\(X_{减}=\dfrac{V_1^2}{2\mu g}\)。如果$>L$则冲出，冲出时速度$V'=\sqrt{V_1^2-2\mu gL}$。像这种不涉及时间的，用速方差公式简单。
+\begin{figure}[H]
+	\centering
+\begin{tikzpicture}[>=Stealth]
+	\coordinate (O) at (0, 0);
+	\coordinate (v1) at (0,2);
+	\coordinate (v2) at (0,-1.5);
+	\coordinate (vt) at(3,0);
+	\coordinate (stop) at(2,2/3);
+	\coordinate (st)at(2,0);
+	\coordinate (c)at(2,-1.5);
+	% Axes
+	\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
+	\draw[thick,->] (0, -2) -- (0, 2.5) node[above left] {$v$};
+	\node[below left] at (O) {$O$};
 	
-	% 绘制物体A
-	\draw[thick] (1,0) rectangle (2,1) node[midway] {A};
-	
-	% 绘制滑轮
-	\filldraw[black] (6.15,0.15) circle (0.2);
-	\draw[thick] (5.8,-0.2) arc (270:90:0.2);
-	
-	% 绘制绳子
-	\draw[thick] (2,0.5) -- (6,0.5) arc (0:-90:0.5) -- (6.5,-2) node[midway, right] {B};
-	
-	% 绘制拉力F
-	\draw[thick, ->] (6.5,-2) -- (6.5,-4) node[below] {$F$};
+	\draw(v2) -- ++(4, 0);
+	\draw[thick, red] (v1) -- (stop) node[below,midway] {$v_2$};
+	\draw[thick,dotted, red] (stop) -- (vt);
+	\path[pattern=crosshatch dots light steel blue] (O)--(st)--(stop)--(v1)--cycle;
+	\node[left] at(v1){$v_1$};
+	\node[left] at(v2){$v_2$};
+	\draw(stop)--(st)--++(0,-2);
+	\node[red] at(0.8,0.75){$L$};
+	\node[red,above]at(stop){$v'$};
+	\path[red,pattern=checkerboard](O)--(st)--(c)node[below right,black]{c}--(v2)--cycle;
+%	% Belt velocity v (dashed line)
+%	\draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
+%	\node[left, red] at (0, 1.5) {$v_0$};
+%	
+%	% Block velocity behavior: v0 -> v then constant
+%	% Coordinate definitions
+%	
+%	
+%	
+%	
+%	% Curve
+%	\draw[blue, thick] (O) -- (TC);
+%	
+%	% TC mark
+%	\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
+%	
+%	% Fill the area enclosed by O, TC, V0
+%	\fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
+%	\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
 \end{tikzpicture}
+	\caption{$v'$是滑下时物块速度，L是对地位移，也是传送带长度，棋盘格围成的面积是传送带位移}
+\end{figure}
+梯形$v_1v'cv_2$围成的面积是物块相对传送带的位移，两者是加法。
+\subsubsection{折返（传送带足够长）}
+当物块速度为0时，对地位移$\le L$时，即传送带\emph{足够长}，会发生折返，类似上抛运动。
+
+\subsubsection{半折返}
+对于$v_1>v_2$，则到达速度0点，然后折返，折返后速度最大只能达到$v_2$：
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth]
+		\coordinate (O) at (0, 0);
+		\coordinate (v1) at (0,2);
+		\coordinate (v2) at (0,-1);
+		\coordinate (vc)at(3,-1); %交点
+		\coordinate (v0)at(2,2); %0速度点
+		% Axes
+		\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
+		\draw[thick,->] (0, -2) -- (0, 2.5) node[above left] {$v$};
+		\node[below left] at (O) {$O$};
+		\draw(v1)node[left]{$v_1$}--(vc)node[below right]{共速}--++(1,0);
+		\draw[dotted](v2)node[left]{$v_2$} -- (vc);
+		\node at(.5,1){$X_{max}$};
+		%	% Belt velocity v (dashed line)
+		%	\draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
+		%	\node[left, red] at (0, 1.5) {$v_0$};
+		%	
+		%	% Block velocity behavior: v0 -> v then constant
+		%	% Coordinate definitions
+		%	
+		%	
+		%	
+		%	
+		%	% Curve
+		%	\draw[blue, thick] (O) -- (TC);
+		%	
+		%	% TC mark
+		%	\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
+		%	
+		%	% Fill the area enclosed by O, TC, V0
+		%	\fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
+		%	\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
+	\end{tikzpicture}
+	\caption{$v_1>v_2$时}
+\end{figure}
+此时，物块回到出发点所用时间
+\[ t_总=\dfrac{v_1-v_2}{\mu g}+\dfrac{v_1^2-v_2^2}{2v_2\mu g}\]
+此公式可以由图得出，并且注意$v_1,v_2$异号，其实就是绝对值加。
+
+
+\subsection{$V_0$与$V_{带}$同向}
+\subsubsection{L不够长}
+一定\textbf{全程加速度不变}，因为达到共速前已经冲出传送带了。
+\subsection{感想}
+其实各种情况都太复杂了，可以简化成：物块在光滑的水平面运动，在其速度达到传送带的速度之前，持续受到恒力$\mu mg$的作用。也可以按竖直上（初速度与传送带异向）下（初速度与传送带同向）抛，自由落体（初速度为0）来计算，只是$a=\mu g$。
+
+传送带模型之所以简单，就是因为加速度不变。
 \end{document}
