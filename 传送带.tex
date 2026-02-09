@@ -88,7 +88,7 @@ PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非�
 
 \subsection{基本语法模板}
 \begin{lstlisting}
-Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
+	Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查找', '替换内容'}
 \end{lstlisting}
 
 \subsection{参数逐步拆解}
@@ -114,7 +114,7 @@ Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查�
 	\item \textbf{\texttt{-replace}} (操作符)：
 	语法：
 	\begin{lstlisting}
-'源' -replace '正则', '新内容'
+		'源' -replace '正则', '新内容'
 	\end{lstlisting}
 	\begin{itemize}
 		\item 默认\textbf{不区分大小写}。
@@ -128,21 +128,21 @@ Get-ChildItem <匹配模式>|Rename-Item -NewName {$_.Name -replace '正则查�
 \subsection{1. 安全模式 (强烈推荐)}
 在正式执行前，务必添加 \texttt{-WhatIf} 参数进行预览，防止误操作。
 \begin{lstlisting}
-Get-ChildItem *.log | Rename-Item -NewName {$_.Name -replace 'old', 'new'} -WhatIf
+	Get-ChildItem *.log | Rename-Item -NewName {$_.Name -replace 'old', 'new'} -WhatIf
 \end{lstlisting}
 
 \subsection{2. 使用捕获组调换顺序}
 场景：将 \texttt{Part1\_Invoice.pdf} 改为 \texttt{Invoice\_Part1.pdf}。
 \begin{lstlisting}
-Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$','$2_$1.pdf'}
+	Get-ChildItem *.pdf | Rename-Item -NewName {$_.Name -replace '^(Part\d+)_(.+)\.pdf$','$2_$1.pdf'}
 \end{lstlisting}
 \textit{注：\texttt{\$1} 和 \texttt{\$2} 对应正则表达式中括号捕获的内容。}
 
 \subsection{3. 仅操作文件名 (保留扩展名)}
 如果担心误改扩展名，可以使用 \texttt{\$\_.BaseName} 仅获取主文件名。
 \begin{lstlisting}
-# 仅给文件名前加 Backup_，不影响后续扩展名
-Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
+	# 仅给文件名前加 Backup_，不影响后续扩展名
+	Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 \end{lstlisting}
 
 \section{总结公式}
@@ -154,117 +154,117 @@ Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 \section{传送带问题一般分析方法}
 %\includegraphics{./pics/1.png}
 \begin{figure}[H]
-\centering
-\begin{tikzpicture}[>=Stealth, scale=1]
-    % === Left: Conveyor Belt Diagram ===
-    \begin{scope}
-        \def\R{0.6} % Pulley radius
-        \def\L{5.0}   % Distance between pulley centers
-        
-        % Pulleys
-        \filldraw[fill=gray!20] (0,0) circle (\R);
-        \filldraw[fill=gray!20] (\L,0) circle (\R);
-        \draw[fill=black] (0,0) circle (0.05);
-        \draw[fill=black] (\L,0) circle (0.05);
-        
-        % Belt
-        \draw[thick] (0,\R) -- (\L,\R);
-        \draw[thick] (0,-\R) -- (\L,-\R);
-        
-        % Rotation arrow (clockwise on right pulley)
-        \draw[->, thick, black] (\L+\R-0.25, \R-0.25) arc (45:-90:0.4);
-        
-        % Block (placed on left side)
-        \coordinate (BlockPos) at (0.4, \R+0.05);
-        \draw[fill=blue!30] (BlockPos) rectangle ++(0.8, 0.5);
-        \node at ($(BlockPos)+(0.4, 0.25)$) {$m$};
-        
-        % Velocity vectors
-        % v0 (Block)
-        \draw[->, thick, red] ($(BlockPos)+(\R/4, 0.05)$) -- ++(1.0, 0) node[right] {$\mu mg$};
-        % v (Belt)
-        \draw[->, thick, black] (\L/3, \R-0.4) -- ++(1.2, 0) node[right] {$v_0$};
-        
-        % Labels
-        \node[below] at (0,-\R) {$A$};
-        \node[below] at (\L,-\R) {$B$};
-        
-        \node[below, align=center] at (\L/2, -1.0) {传送带足够长};
-    \end{scope}
-
-    % === Right: v-t Graph ===
-    \begin{scope}[shift={(8,-1)}]
-    	\coordinate (O) at (0, 0);
-    	\coordinate (TC) at (2, 1.5);
-    	\coordinate (T1) at (2, 0);
-    	\coordinate (V0) at (0, 1.5);
-        
-        
-
-        % Axes
-        \draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
-        \draw[thick,->] (0, -0.5) -- (0, 2.5) node[left] {$v$};
-        \node[below left] at (O) {$O$};
-        
-        % Belt velocity v (dashed line)
-        \draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
-        \node[left, red] at (0, 1.5) {$v_0$};
-        
-        % Block velocity behavior: v0 -> v then constant
-        % Coordinate definitions
-
-       
-        
-        
-        % Curve
-        \draw[blue, thick] (O) -- (TC);
-        
-        % TC mark
-        \draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
-        
-        % Fill the area enclosed by O, TC, V0
-        \fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
-        \fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
-    \end{scope}
-\end{tikzpicture}
-\caption{水平红色三角形区域面积表示相对位移，蓝色竖直三角形区域面积表示对地位移。}
+	\centering
+	\begin{tikzpicture}[>=Stealth, scale=1]
+		% === Left: Conveyor Belt Diagram ===
+		\begin{scope}
+			\def\R{0.6} % Pulley radius
+			\def\L{5.0}   % Distance between pulley centers
+			
+			% Pulleys
+			\filldraw[fill=gray!20] (0,0) circle (\R);
+			\filldraw[fill=gray!20] (\L,0) circle (\R);
+			\draw[fill=black] (0,0) circle (0.05);
+			\draw[fill=black] (\L,0) circle (0.05);
+			
+			% Belt
+			\draw[thick] (0,\R) -- (\L,\R);
+			\draw[thick] (0,-\R) -- (\L,-\R);
+			
+			% Rotation arrow (clockwise on right pulley)
+			\draw[->, thick, black] (\L+\R-0.25, \R-0.25) arc (45:-90:0.4);
+			
+			% Block (placed on left side)
+			\coordinate (BlockPos) at (0.4, \R+0.05);
+			\draw[fill=blue!30] (BlockPos) rectangle ++(0.8, 0.5);
+			\node at ($(BlockPos)+(0.4, 0.25)$) {$m$};
+			
+			% Velocity vectors
+			% v0 (Block)
+			\draw[->, thick, red] ($(BlockPos)+(\R/4, 0.05)$) -- ++(1.0, 0) node[right] {$\mu mg$};
+			% v (Belt)
+			\draw[->, thick, black] (\L/3, \R-0.4) -- ++(1.2, 0) node[right] {$v_0$};
+			
+			% Labels
+			\node[below] at (0,-\R) {$A$};
+			\node[below] at (\L,-\R) {$B$};
+			
+			\node[below, align=center] at (\L/2, -1.0) {传送带足够长};
+		\end{scope}
+		
+		% === Right: v-t Graph ===
+		\begin{scope}[shift={(8,-1)}]
+			\coordinate (O) at (0, 0);
+			\coordinate (TC) at (2, 1.5);
+			\coordinate (T1) at (2, 0);
+			\coordinate (V0) at (0, 1.5);
+			
+			
+			
+			% Axes
+			\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
+			\draw[thick,->] (0, -0.5) -- (0, 2.5) node[left] {$v$};
+			\node[below left] at (O) {$O$};
+			
+			% Belt velocity v (dashed line)
+			\draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
+			\node[left, red] at (0, 1.5) {$v_0$};
+			
+			% Block velocity behavior: v0 -> v then constant
+			% Coordinate definitions
+			
+			
+			
+			
+			% Curve
+			\draw[blue, thick] (O) -- (TC);
+			
+			% TC mark
+			\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
+			
+			% Fill the area enclosed by O, TC, V0
+			\fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
+			\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
+		\end{scope}
+	\end{tikzpicture}
+	\caption{水平红色三角形区域面积表示相对位移，蓝色竖直三角形区域面积表示对地位移。}
 \end{figure}
 对于水平传送带，只要物块速度比传送带慢，就一定加速。如果传送带慢，物块有初速度并且比传送带快，那么一定减。最终两者会达到共速。
 \begin{figure}[H]\centering
-    \begin{tikzpicture}
-	\coordinate (O) at (0, 0);
-	\coordinate (TC) at (2, 1.5);
-	\coordinate (T1) at (2, 0);
-	\coordinate (V0) at (0, 1.5);
-	\coordinate (V1) at (0,3);
-	
-	
-	
-	% Axes
-	\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
-	\draw[thick,->] (0, -0.5) -- (0, 4) node[left] {$v$};
-	\node[below left] at (O) {$O$};
-	
-	% Belt velocity v (dashed line)
-	\draw[dashed, red, thick] (TC) -- (3.5, 1.5) node[right] {$v_0$};
-	\node[left, red] at (0, 1.5) {$v_0$};
-	
-	% Block velocity behavior: v0 -> v then constant
-	% Coordinate definitions
-	
-	
-	
-	
-	% Curve
-	\draw[blue, thick] (V1) -- (TC);
-	
-	% TC mark
-	\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
-	
-	% Fill the area enclosed by O, TC, V0
-	\fill[pattern=horizontal lines, pattern color=red] (V0) -- (TC) -- (V1) -- cycle;
-	\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- (V0)--cycle;
-\end{tikzpicture}
+	\begin{tikzpicture}
+		\coordinate (O) at (0, 0);
+		\coordinate (TC) at (2, 1.5);
+		\coordinate (T1) at (2, 0);
+		\coordinate (V0) at (0, 1.5);
+		\coordinate (V1) at (0,3);
+		
+		
+		
+		% Axes
+		\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
+		\draw[thick,->] (0, -0.5) -- (0, 4) node[left] {$v$};
+		\node[below left] at (O) {$O$};
+		
+		% Belt velocity v (dashed line)
+		\draw[dashed, red, thick] (TC) -- (3.5, 1.5) node[right] {$v_0$};
+		\node[left, red] at (0, 1.5) {$v_0$};
+		
+		% Block velocity behavior: v0 -> v then constant
+		% Coordinate definitions
+		
+		
+		
+		
+		% Curve
+		\draw[blue, thick] (V1) -- (TC);
+		
+		% TC mark
+		\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
+		
+		% Fill the area enclosed by O, TC, V0
+		\fill[pattern=horizontal lines, pattern color=red] (V0) -- (TC) -- (V1) -- cycle;
+		\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- (V0)--cycle;
+	\end{tikzpicture}
 	\caption{物块比传送带快的情况}
 \end{figure}
 \begin{itemize}
@@ -284,34 +284,34 @@ Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 \begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[>=Stealth, scale=1]
-			\def\R{0.2} % Pulley radius
-			\def\L{5.0}   % Distance between pulley centers
-			
-			% Pulleys
-			\filldraw[fill=gray!20] (0,0) circle (\R);
-			\filldraw[fill=gray!20] (\L,0) circle (\R);
-			\draw[fill=black] (0,0) circle (0.05);
-			\draw[fill=black] (\L,0) circle (0.05);
-			
-			% Belt
-			\draw[gray] (0,\R) -- (\L,\R);
-			\draw[gray] (0,-\R) -- (\L,-\R);
-			
-			
-			% Block (placed on left side)
-			\coordinate (BlockPos) at (0.4, \R+0.05);	
-			% Velocity vectors
-			% v0 (Block)
-			\draw[->, thick, red] ($(BlockPos)+(0.6, 0.25)$) -- ++(1.0, 0) node[above,midway] {$v_1$};
-			\draw[fill=blue!30] (BlockPos) rectangle ++(0.8, 0.5);
-			\node at ($(BlockPos)+(0.4, 0.25)$) {$m$};
-			
+		\def\R{0.2} % Pulley radius
+		\def\L{5.0}   % Distance between pulley centers
 		
-			% v (Belt)
-			\draw[->, thick, red] (4, 0.1) -- ++(-1.2, 0) node[below,midway] {$v_2$};
-			
-			
-
+		% Pulleys
+		\filldraw[fill=gray!20] (0,0) circle (\R);
+		\filldraw[fill=gray!20] (\L,0) circle (\R);
+		\draw[fill=black] (0,0) circle (0.05);
+		\draw[fill=black] (\L,0) circle (0.05);
+		
+		% Belt
+		\draw[gray] (0,\R) -- (\L,\R);
+		\draw[gray] (0,-\R) -- (\L,-\R);
+		
+		
+		% Block (placed on left side)
+		\coordinate (BlockPos) at (0.4, \R+0.05);	
+		% Velocity vectors
+		% v0 (Block)
+		\draw[->, thick, red] ($(BlockPos)+(0.6, 0.25)$) -- ++(1.0, 0) node[above,midway] {$v_1$};
+		\draw[fill=blue!30] (BlockPos) rectangle ++(0.8, 0.5);
+		\node at ($(BlockPos)+(0.4, 0.25)$) {$m$};
+		
+		
+		% v (Belt)
+		\draw[->, thick, red] (4, 0.1) -- ++(-1.2, 0) node[below,midway] {$v_2$};
+		
+		
+		
 	\end{tikzpicture}
 	\caption{有限长传送带}
 \end{figure}	
@@ -320,49 +320,49 @@ Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 最简单情况：传送带没有足够长，物块直接冲出传送带。冲出的原因：物块在减速到0之前（对地最大位移），对地位移已经超出传送带长度$L$。如果把减速到0的对地位移记做$X_{减}$，则：\(X_{减}=\dfrac{V_1^2}{2\mu g}\)。如果$>L$则冲出，冲出时速度$V'=\sqrt{V_1^2-2\mu gL}$。像这种不涉及时间的，用速方差公式简单。
 \begin{figure}[H]
 	\centering
-\begin{tikzpicture}[>=Stealth]
-	\coordinate (O) at (0, 0);
-	\coordinate (v1) at (0,2);
-	\coordinate (v2) at (0,-1.5);
-	\coordinate (vt) at(3,0);
-	\coordinate (stop) at(2,2/3);
-	\coordinate (st)at(2,0);
-	\coordinate (c)at(2,-1.5);
-	% Axes
-	\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
-	\draw[thick,->] (0, -2) -- (0, 2.5) node[above left] {$v$};
-	\node[below left] at (O) {$O$};
-	
-	\draw(v2) -- ++(4, 0);
-	\draw[thick, red] (v1) -- (stop) node[below,midway] {$v_2$};
-	\draw[thick,dotted, red] (stop) -- (vt);
-	\path[pattern=crosshatch dots light steel blue] (O)--(st)--(stop)--(v1)--cycle;
-	\node[left] at(v1){$v_1$};
-	\node[left] at(v2){$v_2$};
-	\draw(stop)--(st)--++(0,-2);
-	\node[red] at(0.8,0.75){$L$};
-	\node[red,above]at(stop){$v'$};
-	\path[red,pattern=checkerboard](O)--(st)--(c)node[below right,black]{c}--(v2)--cycle;
-%	% Belt velocity v (dashed line)
-%	\draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
-%	\node[left, red] at (0, 1.5) {$v_0$};
-%	
-%	% Block velocity behavior: v0 -> v then constant
-%	% Coordinate definitions
-%	
-%	
-%	
-%	
-%	% Curve
-%	\draw[blue, thick] (O) -- (TC);
-%	
-%	% TC mark
-%	\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
-%	
-%	% Fill the area enclosed by O, TC, V0
-%	\fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
-%	\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
-\end{tikzpicture}
+	\begin{tikzpicture}[>=Stealth]
+		\coordinate (O) at (0, 0);
+		\coordinate (v1) at (0,2);
+		\coordinate (v2) at (0,-1.5);
+		\coordinate (vt) at(3,0);
+		\coordinate (stop) at(2,2/3);
+		\coordinate (st)at(2,0);
+		\coordinate (c)at(2,-1.5);
+		% Axes
+		\draw[thick,->] (-0.5, 0) -- (4, 0) node[below] {$t$};
+		\draw[thick,->] (0, -2) -- (0, 2.5) node[above left] {$v$};
+		\node[below left] at (O) {$O$};
+		
+		\draw(v2) -- ++(4, 0);
+		\draw[thick, red] (v1) -- (stop) node[below,midway] {$v_2$};
+		\draw[thick,dotted, red] (stop) -- (vt);
+		\path[pattern=crosshatch dots light steel blue] (O)--(st)--(stop)--(v1)--cycle;
+		\node[left] at(v1){$v_1$};
+		\node[left] at(v2){$v_2$};
+		\draw(stop)--(st)--++(0,-2);
+		\node[red] at(0.8,0.75){$L$};
+		\node[red,above]at(stop){$v'$};
+		\path[red,pattern=checkerboard](O)--(st)--(c)node[below right,black]{c}--(v2)--cycle;
+		%	% Belt velocity v (dashed line)
+		%	\draw[dashed, red, thick] (V0) -- (3.5, 1.5) node[right] {$v_0$};
+		%	\node[left, red] at (0, 1.5) {$v_0$};
+		%	
+		%	% Block velocity behavior: v0 -> v then constant
+		%	% Coordinate definitions
+		%	
+		%	
+		%	
+		%	
+		%	% Curve
+		%	\draw[blue, thick] (O) -- (TC);
+		%	
+		%	% TC mark
+		%	\draw[dashed] (TC) -- (2, 0) node[below] {$t_1$};
+		%	
+		%	% Fill the area enclosed by O, TC, V0
+		%	\fill[pattern=horizontal lines, pattern color=red] (O) -- (TC) -- (V0) -- cycle;
+		%	\fill[pattern=vertical lines, pattern color=blue] (O) -- (T1) -- (TC) -- cycle;
+	\end{tikzpicture}
 	\caption{$v'$是滑下时物块速度，L是对地位移，也是传送带长度，棋盘格围成的面积是传送带位移}
 \end{figure}
 梯形$v_1v'cv_2$围成的面积是物块相对传送带的位移，两者是加法。
@@ -420,4 +420,6 @@ Get-ChildItem * | Rename-Item -NewName { 'Backup_' + $_.Name }
 其实各种情况都太复杂了，可以简化成：物块在光滑的水平面运动，在其速度达到传送带的速度之前，持续受到恒力$\mu mg$的作用。也可以按竖直上（初速度与传送带异向）下（初速度与传送带同向）抛，自由落体（初速度为0）来计算，只是$a=\mu g$。
 
 传送带模型之所以简单，就是因为加速度不变。
+
+
 \end{document}
