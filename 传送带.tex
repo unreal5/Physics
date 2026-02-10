@@ -421,5 +421,229 @@ PowerShell 的强大之处在于它处理的是\textbf{对象 (Objects)} 而非�
 
 传送带模型之所以简单，就是因为加速度不变。
 
+\chapter{摩擦力}
+\section{全反力\&摩擦角}
+\begin{exer}
+如图所示，质量为 \( m \) 的物块放在水平地面上，在一个与水平方向成 \( \theta \) 角的拉力 \( F \) 作用下，向右做匀速直线运动。物块与地面间的动摩擦因数 \( \mu \) 已知，重力加速度为 \( g \)，求所需拉力 \( F \) 的最小值。
 
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth]
+		% 地面
+		\draw[thick] (0,0) -- (4,0);
+		\foreach \x in {0, 0.2, ..., 4} {
+			\draw (\x, 0) -- (\x + 0.1, -0.1);
+		}
+		% 物块
+		\draw[thick, fill=gray!20] (1,0) rectangle (2,1);
+		% 拉力F
+		\draw[->, thick] (2, 1) -- (4, 2) node[above right] {$F$};
+		\draw[dash dot dot] (2, 1) -- ++(1, 0);
+		\draw[thick] (3,1)arc(0:26.5:1)node[midway,right]{$\theta$};
+	\end{tikzpicture}
+\end{figure}
+\end{exer}
+\subsection{法一(数学硬算)}
+
+\begin{minipage}{0.5\linewidth}
+设拉力与水平方向夹角为 $\theta$，对金属块受力分析如图所示，金属块做匀速直线运动，故根据平衡条件有
+\[ F \cos \theta = F_f = \mu (mg - F \sin \theta)\]
+可得
+\[
+F \cos \theta + \mu F \sin \theta = \mu mg
+\]
+则有
+\[
+F = \frac{\mu mg}{\sqrt{1+\mu^2} \sin(\alpha+\theta)} \quad \left(\text{其中 } \sin \alpha = \frac{1}{\sqrt{1+\mu^2}}\right),
+\]
+当 $\theta = \dfrac{\pi}{2} - \alpha$ 时 $F$ 最小，故所需拉力 $F$ 的最小值
+\[
+F_{\text{min}} = \frac{\mu mg}{\sqrt{1+\mu^2}}
+\]
+
+\end{minipage}
+\begin{minipage}{.5\linewidth}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth]
+
+		\draw[thick, fill=gray!20] (0,0) rectangle (1,1);
+		% 拉力F
+		\draw[->, thick] (0.5, 0.5) --++ (2, 1) node[above right] {$F$};
+		\draw[] (0.5, 0.5) -- ++(1.5, 0);
+		\draw[thick] (1.5,0.5)arc(0:26.5:1)node[midway,right]{$\theta$};
+		\draw [->,thick](0.5,0.5)--++(0,2)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-1.5,0)node[above]{$F_f$};
+		\draw [->,thick](0.5,0.5)--++(0,-2)node[near end, right]{$mg$};
+		\draw [->,dotted,red](0.5,0.5)--++(2,0)node[near end,below]{$F\cos\theta$};
+		\draw [->,dotted,red](2.5,0.5)--++(0,1)node[midway,right]{$F\sin\theta$};
+	\end{tikzpicture}
+\end{figure}
+\end{minipage}
+\begin{marker}
+	\textit{点拨：}金属块所受的拉力的大小和方向均不确定，故可利用函数的思想，求出用数学知识求解极值。
+\end{marker}
+这种方法复杂、易错，并且计算量大，因此要寻求更好的方法。
+\subsection{法二（全反力）}
+这里引入\text{全反力}的概念，把两个力变成一个力。我们观察到支持力$F_N$和摩擦力$F_f$在\textbf{水平拉力}作用下，如果平衡，它们之间存在正比关系：$F_f=\mu F_N\iff \mu = \dfrac{F_f}{F_N}$。但如果拉力与水平面有某个夹角$\theta$，则支持力会发生变化：\(F_N=mg\mp F\sin\theta\)，拉力向上取“$-$”，向下取“$+$”。
+
+我们发现，支持力变化会引起摩擦力的变化，但无论如何变，都存在$ \mu = \dfrac{F_f}{F_N}$，这就引起我们的思考：如果把这两者的力合成一个力，则合力的大小会变化，但是角度一定不会变化：一定是$\tan\phi=\dfrac{F_f}{F_N}=\mu$
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth]
+		
+		\draw[fill=orange!20] (0,0) rectangle (1,1);
+		
+		\draw [->,thick](0.5,0.5)--++(0,1)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-0.5,0)node[above]{$F_f$};
+		
+		\draw [->,thick](0.5,0.5)--++(0,2)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-1.5,0)node[above]{$F_f$};
+		
+		\draw [->,thick](0.5,0.5)--++(0,3)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-2.5,0)node[above]{$F_f$};
+		
+		
+		\draw [->,red,dotted,thick](0.5,0.5)--(-2.5,3)node[right,near end]{$F_{合（全反力）}$};
+		
+		\draw[red,very thick](0,1)arc(135:90:0.7)node[midway,above]{$\phi$};
+	\end{tikzpicture}
+\end{figure}
+我们把这个合力称\textbf{全反力}。全反力大小会变，与竖直方向夹角$\phi$始终不变，存在关系$\tan\phi=\mu$。因为$\phi$固定，我们也称这个角度为\textbf{摩擦角}。
+\begin{marker}
+全反力实质就是把四力问题变成经典的三力平衡问题。摩擦角只与摩擦系数$\mu$有关。
+\end{marker}
+因此，此类问题就转化成定力定角求最小值问题。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth]
+		
+		\draw[fill=orange!20] (0,0) rectangle (1,1);
+		
+		\draw [->,thick](0.5,0.5)--++(0,1)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-0.5,0)node[above]{$F_f$};
+		
+		\draw [->,thick](0.5,0.5)--++(0,2)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-1.5,0)node[above]{$F_f$};
+		
+		\draw [->,thick](0.5,0.5)--++(0,3)node[right]{$F_N$};
+		\draw [->,thick](0.5,0.5)--++(-2.5,0)node[above]{$F_f$};
+		
+		
+		\draw [->,red,dotted,thick](0.5,0.5)--(-2.5,3)node[right,near end]{$F_{合（全反力）}$};
+		\draw [->,blue,dotted,thick](0.5,0.5)--(1.5,-.5)node[right,near end]{$F_合'$};
+		\draw [->,blue](0.5,0.5)--++(0,-1.5)node[left,near end]{$mg$};
+		
+		\draw[red,very thick](0,1)arc(135:90:0.7)node[midway,above]{$\phi$};
+		
+		\coordinate (H) at ($(0.5,0.5)!(0.5,-1)!(1.5,-0.5)$);  % H是P在AB上的垂足
+		\draw [->,red,very thick](0.5,-1)--(H)node[sloped,above]{$F_{min}$};
+		\draw[red] (0.5,-0.5)arc(90:45:0.5)node[sloped,midway,above]{$\beta$};
+		\draw[blue] (1,-1)arc(0:45:0.5)node[midway,right]{$\alpha$};
+		\draw[blue] (0.5,-1)--++(1,0);
+	\end{tikzpicture}
+\end{figure}
+现在问题变成经典三力平衡。显然从$mg$与全反力所在直线垂直时最小，其中$\tan\phi=\mu$。
+
+则由勾股定理得：斜边
+\(l=\sqrt{1+\mu^2}\)。
+由此\(\sin\phi=\dfrac{\mu}{\sqrt{1+\mu^2}}\)。所以$F_{min}=mg\sin\phi=\dfrac{\mu mg}{\sqrt{1+\mu^2}}$。还可以进一步计算拉力最小时，与水平地面的夹角$\theta$：由上图几何关系可以得出此时$\theta=\phi$。
+
+比较二种方法，可以看出在特定情况下，使用全反力会简化计算。
+\section{实战}
+\begin{exer}
+	小明和小语到机场去为朋友送行，看到有一些旅客斜向下推着旅行箱走，也有一些旅客斜向上拉着旅行箱走。为使质量为 $25\,\text{kg}$ 的行李箱在水平面上做匀速直线运动，可用与水平方向成 $30^\circ$ 角的力 $F_1=100\,\text{N}$ 斜向下推行李箱如左图，重力加速度 $g$ 取 $10\,\text{m/s}^2$。
+	
+	\begin{figure}[H]
+		\begin{tikzpicture}[scale=1.2,>=stealth]
+			% 左图：斜向下推
+			\begin{scope}[xshift=-3cm]
+				% 地面
+				\draw[thick] (-1.5,0) -- (2.5,0);
+				\foreach \x in {-1.4,-1.2,...,2.4} {
+					\draw (\x,0) -- (\x+0.1,-0.1);
+				}
+				% 行李箱
+				\draw[thick, fill=gray!20] (0,0) rectangle (1.5,0.8);
+				% 推力F1
+				\draw[->, thick] (-1,1.4) -- (-0, 0.8) node[midway,sloped, above] {$\hat{F}$};
+				% 角度标注
+				\draw(-0.5,0.8)arc(180:150:0.5)node[left]{$\theta=\ang{30}$};
+				\draw (0,0.8)--++(-1,0);
+				\draw (0.75,0.8) arc[start angle=0, end angle=-30, radius=0.5];
+				\node at (1.0, 0.55) {$\alpha$};
+			\end{scope}
+			
+			% 右图：斜向上拉
+			\begin{scope}[xshift=3cm]
+				% 地面
+				\draw[thick] (-1.5,0) -- (2.5,0);
+				\foreach \x in {-1.4,-1.2,...,2.4} {
+					\draw (\x,0) -- (\x+0.1,-0.1);
+				}
+				% 行李箱
+				\draw[thick, fill=gray!20] (0,0) rectangle (1.5,0.8) node[midway] {甲};
+				% 速度v
+				\draw[->, thick] (0.75,1.2) -- (1.2,1.2) node[above] {$v$};
+				% 拉力F2
+				\draw[->, thick] (1.5,0.8) -- (3, 1.5) node[above right] {$F_2$};
+				% 角度标注
+				\draw[dashed] (1.5,0.8) -- ++(1,0);
+				\draw[thick,red] (2,0.8) arc[start angle=0, end angle=20, radius=0.5]node[right] {$\theta$};
+			\end{scope}
+		\end{tikzpicture}
+	\end{figure}
+\begin{enumerate}
+	\item 	 求行李箱与粗糙水平面之间的动摩擦因数 $\mu$；
+	\item  若现用斜向上的拉力 $F_2$ 作用在行李箱上，如右图所示，求能使旅行箱匀速运动的 $F_2$ 的最小值及此时 $F_2$ 与水平地面间的夹角 $\theta$ 的正切值。
+\end{enumerate}
+\textbf{问一：}由\[F_1\cos\ang{30}=\mu(mg+F_1\sin\ang{30})\iff\mu=\dfrac{\sqrt{3}}{6}\]
+\textbf{问二：}力最小时$\phi=\theta=\arctan\mu$，此时夹角正切值为$\tan\theta=\mu=\dfrac{\sqrt{3}}{6}$，$F_{min}=\dfrac{\mu mg}{\sqrt{1+\mu^2}}=\iff F_{min}=\dfrac{250\sqrt{13}}{13}$
+\end{exer}
+\begin{exer}
+质量为 \(M\) 的木楔倾角为 \(\theta\)，在水平面上保持静止，当将一质量为 \(m\) 的木块放在木楔斜面上时，它正好匀速下滑。如果用与木楔斜面成 \(\alpha\) 角的力 \(F\) 拉着木块匀速上升，如图所示。已知重力加速度为 \(g\)，木楔在整个过程中始终静止。
+
+\begin{center}
+	\begin{tikzpicture}[scale=1.2,>=Stealth]
+		% 地面
+		\draw[thick] (-2,0) -- (3,0);
+		\foreach \x in {-1.9,-1.7,...,2.9} {
+			\draw (\x,0) -- (\x+0.1,-0.1);
+		}
+		
+		\def\angle{30}
+		\coordinate (A)at(0,0);
+		\coordinate (B)at(1.732,0);
+		\coordinate (C)at(1.732,1);
+		% 木楔M
+		\draw[thick, fill=gray!10] (A) -- (B) -- (C) -- cycle;
+		\draw[red,thick] (0.5,0) arc[start angle=0, end angle=30, radius=0.5]node[right,midway]{$\theta$};
+		\begin{scope}[rotate=30]
+			\draw[thick, fill=orange!20] (1,0) rectangle (1.5,0.5) node[midway] {$m$};
+			% 拉力F
+			\draw[dotted,blue] (1.5,0.5) --++ (1,0) ;
+			\draw[->, thick] (1.5,0.5) --++ (1.5,1)node[above] {$F$};
+		\end{scope}
+		%\draw[blue](2,1.732)arc(30:66:1)node[right,near end]{$\alpha$};
+		\draw[blue](1.5,1.3)arc(20:70:.5)node[right,near end]{$\alpha$};
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item 画出 \(m\) 的受力分析图；
+
+	\item 木块与木楔斜面间的动摩擦因数 \(\mu\)；
+
+	\item 当 \(\alpha\) 和 \(\theta\) 满足何种关系时，拉力 \(F\) 有最小值，并求此最小值；
+
+	\item 当 \(F\) 取最小值时，木楔对水平面的摩擦力是多大？
+\end{enumerate}
+ \end{exer}
+ \begin{enumerate}
+ 	\item 受力分析(略)
+ 	\item $\mu = \tan\theta$
+ 	\item 利用全反力及几何关系可知$\tan\phi=\tan\theta\iff\phi=\theta$，所求为$\alpha$，利用补角关系可知：$\alpha=\theta=\phi$。
+ 	由重垂线向全反力所在直线引垂线得$F_{min}=mg\sin(2\theta)=\dfrac{2\mu mg}{1+\mu^2}$
+ 	\item 利用整体法可得：$F\cos(2\theta)=f_{水平}\iff f_{水平}=mg\sin(2\theta)\cos(2\theta)=\dfrac{mg\sin(4\theta)}{2}$
+ \end{enumerate}
 \end{document}
